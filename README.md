@@ -1,6 +1,6 @@
 # Kenpana 
 Kenpana is a support library for interactive large scale visualization of ensembles ADCIRC output data. The library is built in the language: 
-- Xarray for the interface with large NetCDF datasets 
+- Xarray/UGRID/cf_conventions for the interface with large NetCDF datasets 
 - Dask for support for computation
 - Scipy for statistics 
 - Holoviews/Datashader for interactivity
@@ -14,3 +14,6 @@ If you have the compute and only need simple statistics, OVIS provides a faster 
 
 Similarly, Paraview provides client-server interface with distributed compute support, if you don't mind a bit of setup for the ADCIRC data structures prior. 
 
+
+### Features planned 
+- cf convention API 
