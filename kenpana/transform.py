@@ -10,13 +10,13 @@ Notes:
 - Where data is dry, NaNs are used. Should we write custom routines to accelerate these? Should we use water column heihgt or water elevation? 
 - Under the philosphy of "abstracting away" Xarray implementation, we should return full 'mesh data' dataset objects. 
 - Optimize by using depth skipping paramater? This would justify the use of the whole dataset. 
-- Should I "bootstrap" the compoundness function to create a primitave "compoundness" function?
+- Should I "bootstrap" the compoundness function to create a hidden primitave "compoundness" function that also works on numpy types?
 """
 
 import xarray as xr 
 import numpy as np
 
-def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_only: xr.DataArray) -> xr.Dataset:
+def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_only: xr.DataArray):
     """
     Computes the 'compoundness' of a triplet of time series, assuming an inner join alignment. 
 
@@ -40,11 +40,14 @@ def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_on
     if compound.isnull().any() or surge_only.isnull().any() or rivers_only.isnull().any():
         raise ValueError("Input DataArrays contain NaNs. Please handle NaNs before calling this function.")
     
+    if (compound < 0).any() or (surge_only < 0).any() or (rivers_only < 0).any():
+        raise ValueError("Input DataArrays contain negative values. Please ensure all values correspond to water column height.")
+
     diff_compound_surge = abs(compound - surge_only)
     diff_compound_rivers = abs(compound - rivers_only)
     surge_error = diff_compound_surge.max(dim='time')
     rivers_error = diff_compound_rivers.max(dim='time')
-    compoundness = xr.ufuncs.minimum(surge_error, rivers_error)
+    compoundness = np.minimum(surge_error, rivers_error)
 
     return compoundness
 
