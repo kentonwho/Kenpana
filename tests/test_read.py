@@ -83,7 +83,7 @@ def real_fort63_file():
     Path to a real fort.63 NetCDF file for testing.
     """
     # Replace with the actual path to your real fort.63 file
-    return Path("data/test.63.nc")
+    return Path("tests/data/test.63.nc")
 
 # Test corrupted cases
 

@@ -41,6 +41,20 @@ def mock_triplet_gelvs():
 
     return compound, surge_only, rivers_only
 
+@pytest.fixture
+def mock_gelv():
+    "Create a mock global elevation object with bathymetry."
+    time = np.arange("2000-01-01T00:00", "2000-01-01T10:00", dtype="datetime64[h]")
+    elevations = np.random.rand(10, 6)- 0.5
+    bathymetry = np.random.rand(6) - 0.5
+
+    elevations_with_dry = np.where(elevations + bathymetry <= 0, np.nan, elevations)
+
+    gelv_da = xr.DataArray(elevations_with_dry, dims=["time", "node"], coords={"time": time})
+    bathymetry_da = xr.DataArray(bathymetry, dims=["node"])
+    ds = xr.Dataset({"zeta": gelv_da, "depth": bathymetry_da})
+
+    return ds 
 
 """
 For later features where I support ensembles 
@@ -89,6 +103,13 @@ def test_compoundness_max_compound():
 
     result = compoundness_max(compound, surge_only, rivers_only)
     assert (result > 10).all(), "Compoundness should high when both surge and rivers are inaccurate"
+
+def test_water_column_height(mock_gelv):
+    result = water_column_height(mock_gelv)
+    assert isinstance(result, xr.Dataset)
+    assert "water_column_height" in result.data_vars
+    assert result["water_column_height"].isnull().sum() == 0, "Water column height should not contain NaNs"
+    assert (result["water_column_height"] >= 0).all(), "Water column height should be non-negative"
 
 
 """

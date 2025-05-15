@@ -68,8 +68,8 @@ def water_column_height(elv: xr.Dataset) -> xr.Dataset:
 
     water_column_height = elv.drop_vars("zeta")
     bathymetry = elv["depth"]
-    water_column_height["water_column_height"] = elv["zeta"].fillna(0) + bathymetry
-
+    water_column_height["water_column_height"] = xr.where(np.isnan(elv["zeta"]), 0, elv["zeta"] + bathymetry)
+    return water_column_height
 
     
 
