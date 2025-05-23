@@ -15,6 +15,9 @@ Notes:
 
 import xarray as xr 
 import numpy as np
+from dask_jobqueue.slurm import SLURMCluster
+cluster = SLURMCluster()
+cluster.adapt(minimum=1, maximum=10)
 
 def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_only: xr.DataArray, strict=True):
     """
