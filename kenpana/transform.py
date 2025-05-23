@@ -16,7 +16,7 @@ Notes:
 import xarray as xr 
 import numpy as np
 
-def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_only: xr.DataArray):
+def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_only: xr.DataArray, strict=True):
     """
     Computes the 'compoundness' of a triplet of time series, assuming an inner join alignment. 
 
@@ -28,6 +28,9 @@ def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_on
         The time series of water column height surge only forced run.
     rivers_only : xr.DataArray 
         The time series of water column height flow only forced run. 
+    strict : bool, optional
+        If true, the function will do sanity checks on the data. Note that this will force the data to load into
+        memory and may eat up some time.
 
     Returns
     -------
@@ -37,11 +40,12 @@ def compoundness_max(compound: xr.DataArray, surge_only: xr.DataArray, rivers_on
 
 
     xr.set_options(arithmetic_join='inner')
-    if compound.isnull().any() or surge_only.isnull().any() or rivers_only.isnull().any():
-        raise ValueError("Input DataArrays contain NaNs. Please handle NaNs before calling this function.")
-    
-    if (compound < 0).any() or (surge_only < 0).any() or (rivers_only < 0).any():
-        raise ValueError("Input DataArrays contain negative values. Please ensure all values correspond to water column height.")
+    if strict: 
+        if compound.isnull().any() or surge_only.isnull().any() or rivers_only.isnull().any():
+            raise ValueError("Input DataArrays contain NaNs. Please handle NaNs before calling this function.")
+        
+        if (compound < 0).any() or (surge_only < 0).any() or (rivers_only < 0).any():
+            raise ValueError("Input DataArrays contain negative values. Please ensure all values correspond to water column height.")
 
     diff_compound_surge = abs(compound - surge_only)
     diff_compound_rivers = abs(compound - rivers_only)
